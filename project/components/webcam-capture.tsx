@@ -69,7 +69,7 @@ export function WebcamCapture({ onCapture }: WebcamCaptureProps) {
           <CardDescription>
             Please enable camera access in your browser settings to continue
           </CardDescription>
-        </CardContent>
+       </CardHeader>
         <CardContent className="text-center">
           <Button onClick={requestPermission} variant="outline" className="w-full">
             Try Again
