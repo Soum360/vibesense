@@ -1,0 +1,91 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Brand Colors */
+  --primary: 108 92 231; /* #6C5CE7 - Indigo */
+  --accent: 0 209 178; /* #00D1B2 - Teal */
+  
+  /* Mood Colors */
+  --calm: 77 166 255; /* #4DA6FF - Blue */
+  --energetic: 255 122 89; /* #FF7A59 - Orange */
+  --happy: 255 235 59; /* #FFEB3B - Yellow */
+  --sad: 156 163 175; /* #9CA3AF - Gray */
+  --stressed: 239 68 68; /* #EF4444 - Red */
+  --excited: 168 85 247; /* #A855F7 - Purple */
+  --neutral: 148 163 184; /* #94A3B8 - Slate */
+  
+  /* Core System Colors */
+  --background: 255 255 255;
+  --foreground: 15 23 42;
+  --card: 255 255 255;
+  --card-foreground: 15 23 42;
+  --popover: 255 255 255;
+  --popover-foreground: 15 23 42;
+  --primary-foreground: 248 250 252;
+  --secondary: 241 245 249;
+  --secondary-foreground: 15 23 42;
+  --muted: 241 245 249;
+  --muted-foreground: 100 116 139;
+  --accent-foreground: 15 23 42;
+  --destructive: 239 68 68;
+  --destructive-foreground: 248 250 252;
+  --border: 226 232 240;
+  --input: 226 232 240;
+  --ring: 108 92 231;
+  --radius: 0.75rem;
+}
+
+.dark {
+  --background: 15 23 42; /* slate-900 */
+  --foreground: 248 250 252; /* slate-50 */
+  --card: 30 41 59; /* slate-800 */
+  --card-foreground: 248 250 252;
+  --popover: 30 41 59;
+  --popover-foreground: 248 250 252;
+  --primary-foreground: 15 23 42;
+  --secondary: 51 65 85; /* slate-700 */
+  --secondary-foreground: 248 250 252;
+  --muted: 51 65 85;
+  --muted-foreground: 148 163 184; /* slate-400 */
+  --accent-foreground: 15 23 42;
+  --destructive-foreground: 248 250 252;
+  --border: 51 65 85;
+  --input: 51 65 85;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    background: linear-gradient(135deg, hsl(var(--background)) 0%, hsl(var(--muted)) 100%);
+    min-height: 100vh;
+  }
+}
+
+@layer utilities {
+  .mood-gradient-calm {
+    background: linear-gradient(135deg, rgba(77, 166, 255, 0.1) 0%, rgba(0, 209, 178, 0.1) 100%);
+  }
+  .mood-gradient-energetic {
+    background: linear-gradient(135deg, rgba(255, 122, 89, 0.1) 0%, rgba(255, 235, 59, 0.1) 100%);
+  }
+  .mood-gradient-happy {
+    background: linear-gradient(135deg, rgba(255, 235, 59, 0.1) 0%, rgba(0, 209, 178, 0.1) 100%);
+  }
+  .mood-gradient-sad {
+    background: linear-gradient(135deg, rgba(156, 163, 175, 0.1) 0%, rgba(77, 166, 255, 0.1) 100%);
+  }
+  .mood-gradient-stressed {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(156, 163, 175, 0.1) 100%);
+  }
+  .mood-gradient-excited {
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.1) 0%, rgba(255, 122, 89, 0.1) 100%);
+  }
+  .mood-gradient-neutral {
+    background: linear-gradient(135deg, rgba(148, 163, 184, 0.1) 0%, rgba(226, 232, 240, 0.1) 100%);
+  }
+}
