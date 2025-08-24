@@ -1,13 +1,44 @@
 import { NextRequest, NextResponse } from 'next/server';
 import type { MoodRefinement } from '@/lib/types';
 
-// TODO: REPLACE WITH REAL GPT-5 API
-// This is a mock endpoint for demonstration purposes
-// Real implementation should integrate with GPT-5:
-// 
-// const response = await fetch('https://api.openai.com/v1/chat/completions', {
-//   method: 'POST',
-//   headers: {
+async function callOpenAI(mood: string, contextText?: string) {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) throw new Error('OPENAI_API_KEY not set');
+
+  const res = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      model: 'gpt-5',
+      messages: [
+        { role: 'system', content: 'You are an expert mood analyst. Provide refined mood insights and actionable suggestions based on detected emotions.' },
+        { role: 'user', content: `Initial mood detected: ${mood}. Context: ${contextText || 'No additional context'}` }
+      ],
+      max_tokens: 200,
+      temperature: 0.7
+    })
+  });
+
+  const text = await res.text();
+  if (!res.ok) {
+    console.error('OpenAI API error:', res.status, text);
+    throw new Error('OpenAI API request failed');
+  }
+
+  // parse JSON safely
+  let data;
+  try {
+    data = JSON.parse(text);
+  } catch (parseError) {
+    console.error('Failed to parse OpenAI response:', parseError, text);
+    throw new Error('Invalid JSON response from OpenAI');
+  }
+  const content = data?.choices?.[0]?.message?.content ?? '';
+  return content;
+}
 //     'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
 //     'Content-Type': 'application/json'
 //   },
@@ -24,7 +55,43 @@ import type { MoodRefinement } from '@/lib/types';
 //     temperature: 0.7
 //   })
 // });
+const useRealGPT5 = process.env.USE_REAL_GPT5 === 'true';
 
+async function getRefinedMood(mood: string, contextText?: string) {
+  if (useRealGPT5) {
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: 'gpt-5',
+        messages: [
+          {
+            role: 'system',
+            content: 'You are an expert mood analyst. Provide refined mood insights and actionable suggestions based on detected emotions.'
+          },
+          {
+            role: 'user',
+            content: `Initial mood detected: ${mood}. Context: ${contextText || 'No additional context'}`
+          }
+        ],
+        max_tokens: 200,
+        temperature: 0.7
+      })
+    });
+
+    const data = await response.json();
+    // You may want to parse the response more robustly depending on OpenAI's output
+    return {
+      refinedMood: data.choices?.[0]?.message?.content ?? 'No refined mood available',
+      reasoning: '',
+      suggestions: []
+    };
+  }
+  return null;
+}
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -110,7 +177,13 @@ export async function POST(request: NextRequest) {
     };
 
     // Get refinement or default to balanced
-    const refinement = moodRefinements[mood] || moodRefinements.neutral;
+    const baseRefinement = moodRefinements[mood] || moodRefinements.neutral;
+    // Clone the refinement object to avoid mutation
+    const refinement: MoodRefinement = {
+      refinedMood: baseRefinement.refinedMood,
+      reasoning: baseRefinement.reasoning,
+      suggestions: [...baseRefinement.suggestions]
+    };
 
     // Add context-based modifications if provided
     if (contextText) {
@@ -123,12 +196,17 @@ export async function POST(request: NextRequest) {
       }
       
       if (text.includes('tired') || text.includes('exhausted')) {
-        refinement.suggestions = [
+        const tiredSuggestions = [
           'Take a short power nap (10-20 minutes)',
           'Drink water and have a healthy snack',
           'Do gentle stretches or light movement'
         ];
-        refinement.reasoning = 'Your fatigue suggests your body needs rest and restoration.';
+        // Annotate original suggestions for tired context
+        refinement.suggestions = [
+          ...tiredSuggestions,
+          ...refinement.suggestions.map(s => `(While tired) ${s}`)
+        ];
+        refinement.reasoning += ' Additionally, your fatigue suggests your body needs rest and restoration.';
       }
     }
 
